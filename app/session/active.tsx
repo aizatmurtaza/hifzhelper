@@ -1,42 +1,118 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { RatingButton } from '../../src/components/RatingButton';
 import { Colors } from '../../src/theme/colors';
-
-const AYAHS = [
-  {
-    num: 12,
-    total: 30,
-    arabic: 'إِنَّ الَّذِينَ يَخْشَوْنَ رَبَّهُم بِالْغَيْبِ لَهُم مَّغْفِرَةٌ وَأَجْرٌ كَبِيرٌ',
-    translation: 'Indeed, those who fear their Lord unseen will have forgiveness and great reward.',
-    surah: 'Surah Al-Mulk',
-  },
-  {
-    num: 13,
-    total: 30,
-    arabic: 'وَأَسِرُّوا قَوْلَكُمْ أَوِ اجْهَرُوا بِهِ إِنَّهُ عَلِيمٌ بِذَاتِ الصُّدُورِ',
-    translation: 'And conceal your speech or publicize it; indeed, He is Knowing of that within the breasts.',
-    surah: 'Surah Al-Mulk',
-  },
-];
+import { fetchSurahAyahs, Ayah } from '../../src/services/quranApi';
+import { getSurah } from '../../src/data/surahList';
+import { saveSession, getLastSession, getWeakAyahs, Rating } from '../../src/store/sessionStore';
 
 export default function ActiveSessionScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [index, setIndex] = useState(0);
-  const ayah = AYAHS[index % AYAHS.length];
-  const progress = ayah.num / ayah.total;
+  const { surahId, retryWeak } = useLocalSearchParams<{ surahId: string; retryWeak?: string }>();
 
-  const handleRating = () => {
-    if (index + 1 >= AYAHS.length) {
-      router.replace('/session/summary');
+  const [ayahs, setAyahs] = useState<Ayah[]>([]);
+  const [index, setIndex] = useState(0);
+  const [ratings, setRatings] = useState<Rating[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const surahIdNum = Number(surahId);
+  const surah = getSurah(surahIdNum);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        if (retryWeak === 'true') {
+          const last = getLastSession();
+          if (last && last.surahId === surahIdNum) {
+            const weak = getWeakAyahs(last);
+            setAyahs(weak.map((w) => w.ayah));
+            setRatings([]);
+            setIndex(0);
+            setLoading(false);
+            return;
+          }
+        }
+
+        const fetched = await fetchSurahAyahs(surahIdNum);
+        setAyahs(fetched);
+        setRatings([]);
+        setIndex(0);
+      } catch (e: any) {
+        setError(e.message ?? 'Failed to load ayahs. Check your connection.');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [surahIdNum, retryWeak]);
+
+  const handleRating = (rating: Rating) => {
+    const newRatings = [...ratings, rating];
+
+    if (index + 1 >= ayahs.length) {
+      saveSession({ surahId: surahIdNum, ayahs, ratings: newRatings });
+      router.replace(`/session/summary?surahId=${surahIdNum}`);
     } else {
+      setRatings(newRatings);
       setIndex(index + 1);
     }
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.root, styles.center]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Loading {surah?.name ?? 'surah'}…</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.root, styles.center]}>
+        <MaterialIcons name="wifi-off" size={40} color={Colors.outline} />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity
+          style={styles.retryBtn}
+          onPress={() => {
+            setError(null);
+            setLoading(true);
+            fetchSurahAyahs(surahIdNum)
+              .then((fetched) => { setAyahs(fetched); setLoading(false); })
+              .catch((e) => { setError(e.message); setLoading(false); });
+          }}
+        >
+          <Text style={styles.retryBtnText}>Retry</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backLink}>
+          <Text style={styles.backLinkText}>Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (ayahs.length === 0) {
+    return (
+      <View style={[styles.root, styles.center]}>
+        <Text style={styles.errorText}>No ayahs to practice.</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backLink}>
+          <Text style={styles.backLinkText}>Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const ayah = ayahs[index];
+  const total = ayahs.length;
+  const progress = (index + 1) / total;
 
   return (
     <View style={styles.root}>
@@ -51,38 +127,30 @@ export default function ActiveSessionScreen() {
           </View>
           <View style={styles.progressLabels}>
             <Text style={styles.progressCurrent}>AYAH {ayah.num}</Text>
-            <Text style={styles.progressTotal}>{ayah.total} TOTAL</Text>
+            <Text style={styles.progressTotal}>{index + 1} / {total}</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.moreBtn}>
-          <MaterialIcons name="more-vert" size={22} color={Colors.onSurfaceVariant} />
-        </TouchableOpacity>
       </View>
 
       {/* Surah label */}
       <View style={styles.surahMeta}>
-        <Text style={styles.surahLabel}>{ayah.surah.toUpperCase()}</Text>
+        <Text style={styles.surahLabel}>{surah ? surah.name.toUpperCase() : `SURAH ${surahId}`}</Text>
         <Text style={styles.flowLabel}>REVISION FLOW</Text>
       </View>
 
       {/* Main content */}
       <View style={styles.canvas}>
-        {/* Faded ayah number */}
         <View style={styles.ayahNumRow}>
           <Text style={styles.ayahNumBig}>{ayah.num}</Text>
           <Text style={styles.ayahWord}>Ayah</Text>
         </View>
 
-        {/* Arabic text */}
         <Text style={styles.arabicText}>{ayah.arabic}</Text>
 
-        {/* Divider */}
         <View style={styles.divider} />
 
-        {/* Translation */}
         <Text style={styles.translation}>"{ayah.translation}"</Text>
 
-        {/* Recall pill */}
         <View style={styles.recallPill}>
           <Text style={styles.recallText}>RECALL RATING REQUIRED</Text>
         </View>
@@ -90,9 +158,9 @@ export default function ActiveSessionScreen() {
 
       {/* Rating footer */}
       <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
-        <RatingButton rating="forgot" onPress={handleRating} />
-        <RatingButton rating="glanced" onPress={handleRating} />
-        <RatingButton rating="solid" onPress={handleRating} />
+        <RatingButton rating="forgot" onPress={() => handleRating('forgot')} />
+        <RatingButton rating="glanced" onPress={() => handleRating('glanced')} />
+        <RatingButton rating="solid" onPress={() => handleRating('solid')} />
       </View>
     </View>
   );
@@ -100,6 +168,14 @@ export default function ActiveSessionScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.surface },
+  center: { alignItems: 'center', justifyContent: 'center', gap: 16 },
+
+  loadingText: { fontSize: 15, color: Colors.onSurfaceVariant, marginTop: 8 },
+  errorText: { fontSize: 15, color: Colors.onSurfaceVariant, textAlign: 'center', paddingHorizontal: 32 },
+  retryBtn: { backgroundColor: Colors.primary, paddingHorizontal: 28, paddingVertical: 12, borderRadius: 12 },
+  retryBtnText: { color: Colors.onPrimary, fontWeight: '700', fontSize: 15 },
+  backLink: { marginTop: 4 },
+  backLinkText: { fontSize: 14, color: Colors.outline },
 
   header: {
     flexDirection: 'row',
@@ -110,7 +186,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(250,249,245,0.9)',
   },
   closeBtn: { padding: 8, borderRadius: 20 },
-  moreBtn: { padding: 8 },
   progressArea: { flex: 1, gap: 6 },
   progressTrack: { height: 4, backgroundColor: Colors.surfaceContainerHigh, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: '100%', backgroundColor: Colors.primaryContainer, borderRadius: 2 },

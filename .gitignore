@@ -15,3 +15,4 @@ web-build/
 *.log
 stitch/*_raw.json
 stitch/download_urls.txt
+.vercel

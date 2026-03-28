@@ -1,192 +1,149 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+  View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { TopAppBar } from '../../src/components/TopAppBar';
 import { Colors } from '../../src/theme/colors';
-
-type Status = 'solid' | 'improving' | 'slipping';
-
-const SURAHS = [
-  {
-    num: '002',
-    name: 'Al-Baqarah',
-    status: 'solid' as Status,
-    lastSession: 'Oct 24',
-    retention: '98% Retention',
-    health: 95,
-    healthLabel: 'Excellent',
-    healthColor: Colors.primary,
-  },
-  {
-    num: '003',
-    name: 'Al-Imran',
-    status: 'improving' as Status,
-    lastSession: 'Yesterday',
-    retention: '82% Retention',
-    health: 70,
-    healthLabel: 'Recovering',
-    healthColor: Colors.secondary,
-  },
-  {
-    num: '004',
-    name: 'An-Nisa',
-    status: 'slipping' as Status,
-    lastSession: 'Oct 12',
-    retention: '54% Retention',
-    health: 54,
-    healthLabel: 'Critical',
-    healthColor: Colors.tertiary,
-  },
-];
-
-const statusBadge: Record<Status, { bg: string; text: string; label: string }> = {
-  solid: { bg: Colors.primary, text: Colors.onPrimary, label: 'SOLID' },
-  improving: { bg: Colors.secondaryContainer, text: Colors.onSecondaryContainer, label: 'IMPROVING' },
-  slipping: { bg: Colors.tertiaryContainer, text: Colors.onTertiary, label: 'SLIPPING' },
-};
+import { SURAH_LIST, SurahMeta } from '../../src/data/surahList';
 
 export default function LibraryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const TOP_BAR_HEIGHT = insets.top + 56;
 
+  const [query, setQuery] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return SURAH_LIST;
+    const q = query.toLowerCase();
+    return SURAH_LIST.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.arabicName.includes(q) ||
+        String(s.id).includes(q)
+    );
+  }, [query]);
+
+  const renderItem = ({ item: s }: { item: SurahMeta }) => (
+    <TouchableOpacity
+      style={styles.row}
+      onPress={() => router.push(`/surah/${s.id}`)}
+      activeOpacity={0.75}
+    >
+      <View style={styles.rowNum}>
+        <Text style={styles.numText}>{String(s.id).padStart(3, '0')}</Text>
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={styles.nameEn}>{s.name}</Text>
+        <View style={styles.rowMeta}>
+          <Text style={styles.nameAr}>{s.arabicName}</Text>
+          <Text style={styles.dot}>·</Text>
+          <Text style={styles.metaText}>{s.ayahCount} Ayahs</Text>
+          <Text style={styles.dot}>·</Text>
+          <Text style={styles.metaText}>{s.revelation}</Text>
+        </View>
+      </View>
+      <MaterialIcons name="chevron-right" size={20} color={Colors.outline} />
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.root}>
-      <TopAppBar showSearch />
-      <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingTop: TOP_BAR_HEIGHT + 16, paddingBottom: insets.bottom + 110 }]}
+      <TopAppBar />
+      <FlatList
+        data={filtered}
+        keyExtractor={(s) => String(s.id)}
+        renderItem={renderItem}
+        contentContainerStyle={[
+          styles.list,
+          { paddingTop: TOP_BAR_HEIGHT + 16, paddingBottom: insets.bottom + 110 },
+        ]}
         showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <Text style={styles.heading}>Library</Text>
-          <Text style={styles.subheading}>3 Active Surahs being tracked for retention.</Text>
-        </View>
-
-        {SURAHS.map((s) => {
-          const badge = statusBadge[s.status];
-          return (
-            <TouchableOpacity
-              key={s.num}
-              style={styles.card}
-              onPress={() => router.push(`/surah/${s.num}`)}
-              activeOpacity={0.85}
-            >
-              <View style={styles.cardTop}>
-                <View>
-                  <Text style={styles.surahNum}>SURAH {s.num}</Text>
-                  <Text style={styles.surahName}>{s.name}</Text>
-                </View>
-                <View style={[styles.badge, { backgroundColor: badge.bg }]}>
-                  <Text style={[styles.badgeText, { color: badge.text }]}>{badge.label}</Text>
-                </View>
-              </View>
-              <View style={styles.cardMeta}>
-                <View style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Last Session</Text>
-                  <Text style={styles.metaValue}>{s.lastSession}</Text>
-                </View>
-                <View style={styles.metaRow}>
-                  <Text style={styles.metaLabel}>Freshness</Text>
-                  <Text style={styles.metaValue}>{s.retention}</Text>
-                </View>
-              </View>
-              <View style={styles.healthSection}>
-                <View style={styles.healthHeader}>
-                  <Text style={styles.healthLabel}>HEALTH INDICATOR</Text>
-                  <Text style={[styles.healthStatus, { color: s.healthColor }]}>{s.healthLabel}</Text>
-                </View>
-                <View style={styles.healthTrack}>
-                  <View style={[styles.healthFill, { width: `${s.health}%` as any, backgroundColor: s.healthColor }]} />
-                </View>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-
-        {/* Wisdom Quote */}
-        <View style={styles.wisdomCard}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.wisdomTitle}>Review Wisdom</Text>
-            <Text style={styles.wisdomText}>
-              "Commit yourselves to this Qur'an, for by Him in Whose Hand is my soul, it leaves you more easily than camels do that are tied by their legs."
-            </Text>
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text style={styles.heading}>Library</Text>
+            <Text style={styles.subheading}>114 Surahs — tap any to begin a session.</Text>
+            <View style={styles.searchBar}>
+              <MaterialIcons name="search" size={18} color={Colors.outline} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search by name or number…"
+                placeholderTextColor={Colors.outline}
+                value={query}
+                onChangeText={setQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
+                clearButtonMode="while-editing"
+              />
+            </View>
           </View>
-        </View>
-      </ScrollView>
-
-      {/* FAB */}
-      <TouchableOpacity
-        style={[styles.fab, { bottom: insets.bottom + 90 }]}
-        activeOpacity={0.85}
-      >
-        <MaterialIcons name="add" size={28} color={Colors.onPrimary} />
-      </TouchableOpacity>
+        }
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.surface },
-  scroll: { paddingHorizontal: 20, gap: 16 },
+  list: { paddingHorizontal: 20 },
 
-  header: { gap: 4, marginBottom: 8 },
+  header: { gap: 12, marginBottom: 16 },
   heading: { fontSize: 38, fontWeight: '900', letterSpacing: -1.5, color: Colors.onSurface },
-  subheading: { fontSize: 14, color: Colors.onSurfaceVariant, opacity: 0.75 },
+  subheading: { fontSize: 14, color: Colors.onSurfaceVariant, opacity: 0.75, marginTop: -4 },
 
-  card: {
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: 14,
-    padding: 20,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: 'rgba(192,201,187,0.2)',
-    gap: 24,
   },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  surahNum: { fontSize: 10, fontWeight: '700', letterSpacing: 2, color: Colors.primary, opacity: 0.6, textTransform: 'uppercase', marginBottom: 2 },
-  surahName: { fontSize: 22, fontWeight: '700', letterSpacing: -0.3 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  badgeText: { fontSize: 10, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase' },
-
-  cardMeta: { gap: 10 },
-  metaRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  metaLabel: { fontSize: 13, color: Colors.onSurfaceVariant },
-  metaValue: { fontSize: 13, fontWeight: '600', fontStyle: 'italic' },
-
-  healthSection: { gap: 6 },
-  healthHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  healthLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 1.5, textTransform: 'uppercase', opacity: 0.5 },
-  healthStatus: { fontSize: 9, fontWeight: '700' },
-  healthTrack: { height: 5, backgroundColor: Colors.surfaceContainerHighest, borderRadius: 3, overflow: 'hidden' },
-  healthFill: { height: '100%', borderRadius: 3 },
-
-  wisdomCard: {
-    backgroundColor: Colors.surfaceContainerLowest,
-    borderRadius: 14,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(192,201,187,0.12)',
-    marginTop: 4,
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.onSurface,
+    padding: 0,
   },
-  wisdomTitle: { fontSize: 16, fontWeight: '700', marginBottom: 8 },
-  wisdomText: { fontSize: 13, fontStyle: 'italic', color: Colors.onSurfaceVariant, lineHeight: 20 },
 
-  fab: {
-    position: 'absolute',
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.primary,
+  separator: {
+    height: 1,
+    backgroundColor: 'rgba(192,201,187,0.12)',
+    marginLeft: 68,
+  },
+
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    gap: 14,
+  },
+  rowNum: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: Colors.surfaceContainerLow,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
   },
+  numText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primary,
+    letterSpacing: 0.5,
+    fontVariant: ['tabular-nums'],
+  },
+  rowBody: { flex: 1, gap: 3 },
+  nameEn: { fontSize: 16, fontWeight: '700', color: Colors.onSurface, letterSpacing: -0.2 },
+  rowMeta: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  nameAr: { fontSize: 13, color: Colors.primary, opacity: 0.8 },
+  dot: { fontSize: 12, color: Colors.outline },
+  metaText: { fontSize: 12, color: Colors.onSurfaceVariant },
 });

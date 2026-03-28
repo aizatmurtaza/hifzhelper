@@ -4,36 +4,46 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { TopAppBar } from '../../src/components/TopAppBar';
 import { Colors } from '../../src/theme/colors';
+import { getLastSession, Rating } from '../../src/store/sessionStore';
+import { getSurah } from '../../src/data/surahList';
 
-type AyahRating = 'solid' | 'glanced' | 'forgot';
-
-interface AyahSummaryRow {
-  num: number;
-  transliteration: string;
-  rating: AyahRating;
-}
-
-const AYAH_ROWS: AyahSummaryRow[] = [
-  { num: 1, transliteration: 'Tabarakalladhi biyadihi...', rating: 'solid' },
-  { num: 2, transliteration: 'Alladhi khalaqal mawta...', rating: 'glanced' },
-  { num: 3, transliteration: 'Alladhi khalaqa sab\'a...', rating: 'solid' },
-  { num: 4, transliteration: 'Thummar ji\'il basara...', rating: 'forgot' },
-  { num: 5, transliteration: 'Wa laqad zayyannas sama\'...', rating: 'solid' },
-];
-
-const ratingConfig: Record<AyahRating, { bg: string; text: string; label: string; borderColor?: string }> = {
-  solid: { bg: 'rgba(27,94,32,0.1)', text: Colors.primaryContainer, label: 'SOLID' },
-  glanced: { bg: Colors.secondaryContainer, text: Colors.onSecondaryContainer, label: 'GLANCED', borderColor: Colors.secondaryContainer },
-  forgot: { bg: Colors.tertiaryContainer, text: '#ffffff', label: 'FORGOT', borderColor: Colors.tertiaryContainer },
+const ratingConfig: Record<Rating, { bg: string; text: string; label: string; rowBg?: string; borderColor?: string }> = {
+  solid:   { bg: 'rgba(27,94,32,0.12)',  text: Colors.primary,                label: 'SOLID' },
+  glanced: { bg: Colors.secondaryContainer, text: Colors.onSecondaryContainer, label: 'GLANCED', rowBg: 'rgba(255,156,51,0.06)', borderColor: Colors.secondaryContainer },
+  forgot:  { bg: Colors.tertiaryContainer,  text: Colors.onTertiaryContainer,  label: 'FORGOT',  rowBg: 'rgba(166,11,18,0.06)',  borderColor: Colors.tertiaryContainer },
 };
 
 export default function SessionSummaryScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { surahId } = useLocalSearchParams<{ surahId: string }>();
   const TOP_BAR_HEIGHT = insets.top + 56;
+
+  const session = getLastSession();
+  const surah = getSurah(Number(surahId));
+
+  if (!session) {
+    return (
+      <View style={[styles.root, styles.center]}>
+        <Text style={styles.noSessionText}>No session data found.</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backLink}>
+          <Text style={styles.backLinkText}>Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const solid   = session.ratings.filter((r) => r === 'solid').length;
+  const glanced = session.ratings.filter((r) => r === 'glanced').length;
+  const forgot  = session.ratings.filter((r) => r === 'forgot').length;
+  const total   = session.ratings.length;
+  const mastery = Math.round((solid / total) * 100);
+  const weakCount = glanced + forgot;
+
+  const surahName = surah?.name ?? `Surah ${surahId}`;
 
   return (
     <View style={styles.root}>
@@ -46,13 +56,13 @@ export default function SessionSummaryScreen() {
         <View style={styles.scoreHeader}>
           <View>
             <Text style={styles.eyebrow}>SESSION SUMMARY</Text>
-            <Text style={styles.surahTitle}>Surah Al-Mulk</Text>
+            <Text style={styles.surahTitle}>{surahName}</Text>
           </View>
           <View style={styles.scoreRow}>
-            <Text style={styles.scoreNum}>80</Text>
+            <Text style={styles.scoreNum}>{mastery}</Text>
             <Text style={styles.scorePct}>%</Text>
             <View style={styles.scoreLabel}>
-              <Text style={styles.scoreLabelText}>MASTERY SCORE</Text>
+              <Text style={styles.scoreLabelText}>MASTERY{'\n'}SCORE</Text>
             </View>
           </View>
         </View>
@@ -62,21 +72,21 @@ export default function SessionSummaryScreen() {
           <View style={[styles.bentoCard, { backgroundColor: Colors.primaryContainer }]}>
             <MaterialIcons name="check-circle" size={20} color={Colors.onPrimaryContainer} />
             <View>
-              <Text style={styles.bentoCount}>24</Text>
+              <Text style={styles.bentoCount}>{solid}</Text>
               <Text style={[styles.bentoLabel, { color: Colors.onPrimaryContainer }]}>SOLID</Text>
             </View>
           </View>
           <View style={[styles.bentoCard, { backgroundColor: Colors.secondaryContainer }]}>
             <MaterialIcons name="visibility" size={20} color={Colors.onSecondaryContainer} />
             <View>
-              <Text style={[styles.bentoCount, { color: Colors.onSecondaryContainer }]}>4</Text>
+              <Text style={[styles.bentoCount, { color: Colors.onSecondaryContainer }]}>{glanced}</Text>
               <Text style={[styles.bentoLabel, { color: Colors.onSecondaryContainer }]}>GLANCED</Text>
             </View>
           </View>
           <View style={[styles.bentoCard, { backgroundColor: Colors.tertiaryContainer }]}>
             <MaterialIcons name="error" size={20} color={Colors.onTertiaryContainer} />
             <View>
-              <Text style={[styles.bentoCount, { color: Colors.onTertiaryContainer }]}>2</Text>
+              <Text style={[styles.bentoCount, { color: Colors.onTertiaryContainer }]}>{forgot}</Text>
               <Text style={[styles.bentoLabel, { color: Colors.onTertiaryContainer }]}>FORGOT</Text>
             </View>
           </View>
@@ -86,37 +96,35 @@ export default function SessionSummaryScreen() {
         <View style={styles.listSection}>
           <View style={styles.listHeader}>
             <Text style={styles.listTitle}>Verse-by-Verse Review</Text>
-            <Text style={styles.listCount}>30 Ayahs Total</Text>
+            <Text style={styles.listCount}>{total} Ayahs</Text>
           </View>
           <View style={styles.listCard}>
-            {AYAH_ROWS.map((row) => {
-              const rc = ratingConfig[row.rating];
-              const isGlanced = row.rating === 'glanced';
-              const isForgot = row.rating === 'forgot';
+            {session.ayahs.map((ayah, i) => {
+              const rating = session.ratings[i];
+              const rc = ratingConfig[rating];
               return (
                 <View
-                  key={row.num}
+                  key={ayah.num}
                   style={[
                     styles.ayahRow,
-                    isGlanced && styles.glancedRow,
-                    isForgot && styles.forgotRow,
+                    rc.rowBg ? { backgroundColor: rc.rowBg, borderLeftWidth: 4, borderLeftColor: rc.borderColor } : null,
                   ]}
                 >
                   <View style={styles.ayahLeft}>
                     <View style={[
                       styles.ayahNumBox,
-                      isGlanced && { backgroundColor: 'rgba(255,156,51,0.2)' },
-                      isForgot && { backgroundColor: 'rgba(166,11,18,0.2)' },
+                      rating === 'glanced' && { backgroundColor: 'rgba(255,156,51,0.2)' },
+                      rating === 'forgot'  && { backgroundColor: 'rgba(166,11,18,0.2)' },
                     ]}>
                       <Text style={[
                         styles.ayahNumText,
-                        isGlanced && { color: Colors.onSecondaryContainer },
-                        isForgot && { color: Colors.onTertiaryContainer },
-                      ]}>{row.num}</Text>
+                        rating === 'glanced' && { color: Colors.onSecondaryContainer },
+                        rating === 'forgot'  && { color: Colors.onTertiaryContainer },
+                      ]}>{ayah.num}</Text>
                     </View>
-                    <View>
-                      <Text style={styles.ayahTitle}>Ayah {row.num}</Text>
-                      <Text style={styles.ayahTranslit}>{row.transliteration}</Text>
+                    <View style={styles.ayahTextWrap}>
+                      <Text style={styles.ayahTitle}>Ayah {ayah.num}</Text>
+                      <Text style={styles.ayahArabic} numberOfLines={1}>{ayah.arabic}</Text>
                     </View>
                   </View>
                   <View style={[styles.ratingBadge, { backgroundColor: rc.bg }]}>
@@ -125,29 +133,36 @@ export default function SessionSummaryScreen() {
                 </View>
               );
             })}
-            <View style={styles.ellipsisRow}>
-              <Text style={styles.ellipsisText}>... Continued for Ayahs 6 - 30 ...</Text>
-            </View>
           </View>
         </View>
 
         {/* Actions */}
         <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.retryBtn}
-            onPress={() => router.replace('/session/active')}
-            activeOpacity={0.85}
-          >
-            <MaterialIcons name="refresh" size={18} color="#ffffff" />
-            <Text style={styles.retryBtnText}>Retry Weak Ayahs (6)</Text>
-          </TouchableOpacity>
+          {weakCount > 0 && (
+            <TouchableOpacity
+              style={styles.retryBtn}
+              onPress={() => router.replace(`/session/active?surahId=${surahId}&retryWeak=true`)}
+              activeOpacity={0.85}
+            >
+              <MaterialIcons name="refresh" size={18} color="#ffffff" />
+              <Text style={styles.retryBtnText}>Retry Weak Ayahs ({weakCount})</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.restartBtn}
-            onPress={() => router.replace('/session/active')}
+            onPress={() => router.replace(`/session/active?surahId=${surahId}`)}
             activeOpacity={0.85}
           >
             <MaterialIcons name="restart-alt" size={18} color={Colors.onSurface} />
             <Text style={styles.restartBtnText}>Start Full Surah Over</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.libraryBtn}
+            onPress={() => router.replace('/(tabs)/library')}
+            activeOpacity={0.85}
+          >
+            <MaterialIcons name="menu-book" size={18} color={Colors.primary} />
+            <Text style={styles.libraryBtnText}>Back to Library</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -157,7 +172,12 @@ export default function SessionSummaryScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.surface },
+  center: { alignItems: 'center', justifyContent: 'center', gap: 12 },
   scroll: { paddingHorizontal: 18, gap: 24 },
+
+  noSessionText: { fontSize: 15, color: Colors.onSurfaceVariant },
+  backLink: { marginTop: 4 },
+  backLinkText: { fontSize: 14, color: Colors.primary, fontWeight: '600' },
 
   scoreHeader: { gap: 16 },
   eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1.5, color: Colors.secondary, textTransform: 'uppercase', marginBottom: 4 },
@@ -188,17 +208,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(192,201,187,0.08)',
   },
-  glancedRow: { backgroundColor: 'rgba(255,156,51,0.06)', borderLeftWidth: 4, borderLeftColor: Colors.secondaryContainer },
-  forgotRow: { backgroundColor: 'rgba(166,11,18,0.06)', borderLeftWidth: 4, borderLeftColor: Colors.tertiaryContainer },
   ayahLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   ayahNumBox: { width: 30, height: 30, borderRadius: 6, backgroundColor: Colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center' },
   ayahNumText: { fontSize: 12, fontWeight: '700', color: Colors.onSurface },
+  ayahTextWrap: { flex: 1, gap: 2 },
   ayahTitle: { fontSize: 13, fontWeight: '600', color: Colors.onSurface },
-  ayahTranslit: { fontSize: 10, color: Colors.outline, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 1 },
-  ratingBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  ayahArabic: { fontSize: 12, color: Colors.primary, opacity: 0.7 },
+  ratingBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginLeft: 8 },
   ratingText: { fontSize: 10, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
-  ellipsisRow: { padding: 18, alignItems: 'center', borderTopWidth: 1, borderTopColor: 'rgba(192,201,187,0.1)' },
-  ellipsisText: { fontSize: 12, color: Colors.outline },
 
   actions: { gap: 10 },
   retryBtn: {
@@ -221,4 +238,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   restartBtnText: { color: Colors.onSurface, fontWeight: '700', fontSize: 15 },
+  libraryBtn: {
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 14,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(192,201,187,0.2)',
+  },
+  libraryBtnText: { color: Colors.primary, fontWeight: '700', fontSize: 15 },
 });
