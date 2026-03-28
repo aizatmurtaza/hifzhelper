@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Library | Al-Murooja'ah</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-surface-variant": "#41493e",
+              "inverse-on-surface": "#f2f1ed",
+              "on-primary-fixed-variant": "#0c5216",
+              "tertiary-fixed": "#ffdad6",
+              "on-secondary": "#ffffff",
+              "primary-fixed": "#acf4a4",
+              "tertiary-container": "#a60b12",
+              "surface-container-lowest": "#ffffff",
+              "surface": "#faf9f5",
+              "on-primary": "#ffffff",
+              "surface-container": "#efeeea",
+              "on-background": "#1b1c1a",
+              "inverse-primary": "#91d78a",
+              "surface-dim": "#dbdad6",
+              "outline-variant": "#c0c9bb",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2f312e",
+              "surface-tint": "#2a6b2c",
+              "on-secondary-container": "#693900",
+              "error-container": "#ffdad6",
+              "surface-container-high": "#e9e8e4",
+              "on-secondary-fixed-variant": "#6b3b00",
+              "on-secondary-fixed": "#2d1600",
+              "surface-bright": "#faf9f5",
+              "secondary": "#8d4f00",
+              "on-tertiary-container": "#ffb2a9",
+              "secondary-container": "#ff9c33",
+              "on-surface": "#1b1c1a",
+              "background": "#faf9f5",
+              "secondary-fixed-dim": "#ffb877",
+              "on-primary-container": "#90d689",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#410002",
+              "secondary-fixed": "#ffdcc0",
+              "primary": "#00450d",
+              "primary-fixed-dim": "#91d78a",
+              "on-tertiary-fixed-variant": "#93000b",
+              "surface-container-low": "#f4f4f0",
+              "primary-container": "#1b5e20",
+              "tertiary-fixed-dim": "#ffb4ab",
+              "outline": "#717a6d",
+              "surface-container-highest": "#e3e2df",
+              "tertiary": "#7c0007",
+              "surface-variant": "#e3e2df",
+              "on-primary-fixed": "#002203",
+              "on-error": "#ffffff",
+              "on-error-container": "#93000a"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; -webkit-font-smoothing: antialiased; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-header { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#FAF9F5]/85 backdrop-blur-md">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#1B5E20]">menu_book</span>
+<h1 class="font-manrope font-extrabold tracking-tight text-xl text-[#1B5E20]">Al-Murooja'ah</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-[#EFEEEA] transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-stone-500">search</span>
+</button>
+<span class="material-symbols-outlined text-stone-500">account_circle</span>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-5xl mx-auto">
+<!-- Header Section -->
+<header class="mb-12">
+<h2 class="text-[2.75rem] font-extrabold tracking-tight leading-none mb-4">Library</h2>
+<p class="text-on-surface-variant font-medium opacity-70">3 Active Surahs being tracked for retention.</p>
+</header>
+<!-- Bento Grid Layout for Surahs -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1: Al-Baqarah (Solid State) -->
+<div class="bg-surface-container-low rounded-xl p-6 transition-all hover:bg-surface-container-high group border border-[#C0C9BB]/15">
+<div class="flex justify-between items-start mb-8">
+<div>
+<span class="text-[10px] font-bold tracking-[0.15em] text-primary opacity-60 uppercase mb-1 block">Surah 002</span>
+<h3 class="text-2xl font-bold tracking-tight">Al-Baqarah</h3>
+</div>
+<span class="px-3 py-1 bg-primary text-on-primary text-[10px] font-bold rounded-full tracking-wider uppercase">Solid</span>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant font-medium">Last Session</span>
+<span class="font-semibold italic">Oct 24</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant font-medium">Freshness</span>
+<span class="font-semibold italic">98% Retention</span>
+</div>
+</div>
+<div class="pt-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Health Indicator</span>
+<span class="text-[10px] font-bold text-primary">Excellent</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[95%]"></div>
+</div>
+</div>
+</div>
+<!-- Card 2: Al-Imran (Improving State) -->
+<div class="bg-surface-container-low rounded-xl p-6 transition-all hover:bg-surface-container-high group border border-[#C0C9BB]/15">
+<div class="flex justify-between items-start mb-8">
+<div>
+<span class="text-[10px] font-bold tracking-[0.15em] text-primary opacity-60 uppercase mb-1 block">Surah 003</span>
+<h3 class="text-2xl font-bold tracking-tight">Al-Imran</h3>
+</div>
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded-full tracking-wider uppercase">Improving</span>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant font-medium">Last Session</span>
+<span class="font-semibold italic">Yesterday</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant font-medium">Freshness</span>
+<span class="font-semibold italic">82% Retention</span>
+</div>
+</div>
+<div class="pt-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Health Indicator</span>
+<span class="text-[10px] font-bold text-secondary">Recovering</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[70%]"></div>
+</div>
+</div>
+</div>
+<!-- Card 3: An-Nisa (Slipping State) -->
+<div class="bg-surface-container-low rounded-xl p-6 transition-all hover:bg-surface-container-high group border border-[#C0C9BB]/15">
+<div class="flex justify-between items-start mb-8">
+<div>
+<span class="text-[10px] font-bold tracking-[0.15em] text-primary opacity-60 uppercase mb-1 block">Surah 004</span>
+<h3 class="text-2xl font-bold tracking-tight">An-Nisa</h3>
+</div>
+<span class="px-3 py-1 bg-tertiary-container text-on-tertiary text-[10px] font-bold rounded-full tracking-wider uppercase">Slipping</span>
+</div>
+<div class="space-y-4 mb-8">
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant font-medium">Last Session</span>
+<span class="font-semibold italic">Oct 12</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-on-surface-variant font-medium">Freshness</span>
+<span class="font-semibold italic">54% Retention</span>
+</div>
+</div>
+<div class="pt-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold tracking-widest uppercase opacity-50">Health Indicator</span>
+<span class="text-[10px] font-bold text-tertiary">Critical</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[54%]"></div>
+</div>
+</div>
+</div>
+<!-- Visual Decorative Element: Manuscript Aesthetic -->
+<div class="lg:col-span-3 bg-surface-container-lowest rounded-xl p-8 flex items-center justify-between border border-[#C0C9BB]/10">
+<div class="max-w-md">
+<h4 class="text-lg font-bold mb-2">Review Wisdom</h4>
+<p class="text-sm italic text-on-surface-variant leading-relaxed">"Commit yourselves to this Qur’an, for by Him in Whose Hand is my soul, it leaves you more easily than camels do that are tied by their legs."</p>
+</div>
+<div class="hidden md:block">
+<img alt="Aesthetic closeup of parchment paper" class="w-24 h-24 rounded-lg object-cover grayscale opacity-40" data-alt="Soft focused close up of ancient textured parchment paper with warm lighting and subtle shadows of leaves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDU09-gGe9S1siJT1v6eKZYYra2zFgIqO4_5mXekBXN2S2glV6LOj3ZMS2FyrX4d6ZDMO5wySN61IuO0_nCBvVW-XW2qE2SVttLVOkjNTOfw2B1vCsti-cybEWq0RW8WXBFsduLDWN0Oqzz8e9nQFej3xzSRXGfad6dhrudA-vzFru4UmjNkZ22stgIxM-aQrORIR1MXO20hyFPaMQHiLYA00xVO3ulIM_sUm_eE4v6_y07fgmpXCM8FcS0WOcfv4Kh-F8fOAA1XZs"/>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-28 right-8 w-16 h-16 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center transition-transform hover:scale-105 active:scale-90 z-[60]">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-[#FAF9F5]/85 backdrop-blur-md rounded-t-xl shadow-[0_-4px_24px_rgba(27,28,26,0.04)]">
+<div class="flex justify-around items-center w-full h-20 pb-safe px-4">
+<a class="flex flex-col items-center justify-center text-stone-400 px-3 py-1 hover:text-emerald-800 transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="text-[11px] font-manrope font-semibold uppercase tracking-wider">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#1B5E20] bg-[#ACF4A4]/30 rounded-lg px-3 py-1 transition-transform active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined mb-1">import_contacts</span>
+<span class="text-[11px] font-manrope font-semibold uppercase tracking-wider">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 px-3 py-1 hover:text-emerald-800 transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined mb-1">history</span>
+<span class="text-[11px] font-manrope font-semibold uppercase tracking-wider">History</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-400 px-3 py-1 hover:text-emerald-800 transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="text-[11px] font-manrope font-semibold uppercase tracking-wider">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

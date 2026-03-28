@@ -1,0 +1,17 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+.env
+.env.local
+.DS_Store
+*.log
+stitch/*_raw.json
+stitch/download_urls.txt

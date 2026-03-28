@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface-variant": "#41493e",
+                        "inverse-on-surface": "#f2f1ed",
+                        "on-primary-fixed-variant": "#0c5216",
+                        "tertiary-fixed": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#acf4a4",
+                        "tertiary-container": "#a60b12",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#faf9f5",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#efeeea",
+                        "on-background": "#1b1c1a",
+                        "inverse-primary": "#91d78a",
+                        "surface-dim": "#dbdad6",
+                        "outline-variant": "#c0c9bb",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#2f312e",
+                        "surface-tint": "#2a6b2c",
+                        "on-secondary-container": "#693900",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#e9e8e4",
+                        "on-secondary-fixed-variant": "#6b3b00",
+                        "on-secondary-fixed": "#2d1600",
+                        "surface-bright": "#faf9f5",
+                        "secondary": "#8d4f00",
+                        "on-tertiary-container": "#ffb2a9",
+                        "secondary-container": "#ff9c33",
+                        "on-surface": "#1b1c1a",
+                        "background": "#faf9f5",
+                        "secondary-fixed-dim": "#ffb877",
+                        "on-primary-container": "#90d689",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#410002",
+                        "secondary-fixed": "#ffdcc0",
+                        "primary": "#00450d",
+                        "primary-fixed-dim": "#91d78a",
+                        "on-tertiary-fixed-variant": "#93000b",
+                        "surface-container-low": "#f4f4f0",
+                        "primary-container": "#1b5e20",
+                        "tertiary-fixed-dim": "#ffb4ab",
+                        "outline": "#717a6d",
+                        "surface-container-highest": "#e3e2df",
+                        "tertiary": "#7c0007",
+                        "surface-variant": "#e3e2df",
+                        "on-primary-fixed": "#002203",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope", "sans-serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .arabic-text {
+            font-family: serif; /* Fallback for high-quality Arabic rendering */
+            line-height: 1.8;
+            direction: rtl;
+        }
+        body {
+            background-color: #faf9f5;
+            color: #1b1c1a;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation (Shell Suppressed for Focus, replaced with Minimal Progress Header) -->
+<header class="fixed top-0 w-full z-50 bg-[#FAF9F5]/85 backdrop-blur-md">
+<div class="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button class="p-2 -ml-2 hover:bg-surface-container rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined text-on-surface">close</span>
+</button>
+<div class="flex flex-col">
+<span class="text-xs font-label font-bold uppercase tracking-widest text-on-surface-variant">Surah Al-Mulk</span>
+<span class="text-[10px] font-label font-medium text-outline uppercase tracking-wider">Revision Flow</span>
+</div>
+</div>
+<div class="flex-1 max-w-xs mx-8">
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[40%] rounded-full"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] font-label font-bold text-primary tracking-tighter">AYAH 12</span>
+<span class="text-[10px] font-label font-bold text-outline tracking-tighter">30 TOTAL</span>
+</div>
+</div>
+<div class="flex items-center">
+<span class="material-symbols-outlined text-on-surface-variant" style="font-variation-settings: 'opsz' 20;">more_vert</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="min-h-screen pt-24 pb-48 flex flex-col items-center justify-center px-6 relative">
+<!-- Subtle Textural Background Element -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+<div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-fixed-dim/30 blur-[120px] rounded-full"></div>
+<div class="absolute top-1/2 -left-48 w-80 h-80 bg-secondary-fixed/20 blur-[100px] rounded-full"></div>
+</div>
+<div class="w-full max-w-3xl flex flex-col items-center gap-12 text-center relative z-10">
+<!-- Focus Chronometer (Visual Metadata) -->
+<div class="flex items-baseline gap-2 opacity-40 select-none">
+<span class="text-7xl font-light font-headline tracking-tighter">12</span>
+<span class="text-xl font-medium font-label uppercase tracking-widest">Ayah</span>
+</div>
+<!-- Arabic Content Block -->
+<div class="w-full space-y-12">
+<h1 class="arabic-text text-5xl md:text-7xl lg:text-8xl text-primary leading-loose tracking-normal px-4">
+                    إِنَّ الَّذِينَ يَخْشَوْنَ رَبَّهُم بِالْغَيْبِ لَهُم مَّغْفِرَةٌ وَأَجْرٌ كَبِيرٌ
+                </h1>
+<div class="flex justify-center">
+<div class="h-[1px] w-12 bg-outline-variant/30"></div>
+</div>
+<!-- Translation Block (Editorial Voice) -->
+<p class="text-lg md:text-xl font-medium text-on-surface-variant max-w-xl mx-auto leading-relaxed italic opacity-80">
+                    "Indeed, those who fear their Lord unseen will have forgiveness and great reward."
+                </p>
+</div>
+<!-- Contextual Note -->
+<div class="mt-8 px-4 py-2 bg-surface-container rounded-full">
+<p class="text-[10px] font-label font-bold uppercase tracking-[0.15em] text-outline">
+                    Recall Rating Required
+                </p>
+</div>
+</div>
+</main>
+<!-- Rating Navigation (Fixed Bottom) -->
+<footer class="fixed bottom-0 w-full z-50 bg-[#FAF9F5]/90 backdrop-blur-xl">
+<div class="max-w-screen-md mx-auto h-32 px-6 flex items-center justify-between gap-4">
+<!-- Rating: Forgot (Tertiary Container) -->
+<button class="flex-1 group flex flex-col items-center justify-center gap-2 p-4 rounded-xl hover:bg-tertiary-container/10 transition-all active:scale-95">
+<div class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center shadow-lg group-hover:shadow-tertiary-container/20 transition-all">
+<span class="material-symbols-outlined text-white text-2xl">close</span>
+</div>
+<span class="text-[11px] font-label font-extrabold uppercase tracking-widest text-tertiary">Forgot</span>
+</button>
+<!-- Rating: Glanced (Secondary Container) -->
+<button class="flex-1 group flex flex-col items-center justify-center gap-2 p-4 rounded-xl hover:bg-secondary-container/10 transition-all active:scale-95">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center shadow-lg group-hover:shadow-secondary-container/20 transition-all">
+<span class="material-symbols-outlined text-on-secondary-container text-2xl">replay</span>
+</div>
+<span class="text-[11px] font-label font-extrabold uppercase tracking-widest text-secondary">Glanced</span>
+</button>
+<!-- Rating: Solid (Primary Container) -->
+<button class="flex-1 group flex flex-col items-center justify-center gap-2 p-4 rounded-xl hover:bg-primary-container/10 transition-all active:scale-95">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center shadow-lg group-hover:shadow-primary-container/20 transition-all">
+<span class="material-symbols-outlined text-white text-2xl">check</span>
+</div>
+<span class="text-[11px] font-label font-extrabold uppercase tracking-widest text-primary">Solid</span>
+</button>
+</div>
+<!-- Safety spacing for home indicators on mobile -->
+<div class="h-4"></div>
+</footer>
+</body></html>
