@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { TopAppBar } from '../../src/components/TopAppBar';
 import { Colors } from '../../src/theme/colors';
+import { SURAH_LIST, SurahMeta } from '../../src/data/surahList';
+import { getLastSession } from '../../src/store/sessionStore';
 
 const SURAHS_DUE = [
   { num: 18, name: 'Al-Kahf', ayahs: 110, lastSession: '4h ago' },
@@ -21,10 +23,124 @@ const WEAK_AYAHS = [
   { surah: 'Yusuf', ayah: 'Ayah 21' },
 ];
 
+const QUICK_START_IDS = [1, 112, 113, 114, 67, 36, 55, 18];
+const QUICK_START = QUICK_START_IDS.map(id => SURAH_LIST.find(s => s.id === id)!);
+
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const TOP_BAR_HEIGHT = insets.top + 56;
+
+  const isFirstTime = getLastSession() === null;
+  const [query, setQuery] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return [];
+    const q = query.toLowerCase();
+    return SURAH_LIST.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.arabicName.includes(q) ||
+        String(s.id).includes(q)
+    ).slice(0, 6);
+  }, [query]);
+
+  if (isFirstTime) {
+    return (
+      <View style={styles.root}>
+        <TopAppBar />
+        <ScrollView
+          contentContainerStyle={[
+            styles.firstTimeScroll,
+            { paddingTop: TOP_BAR_HEIGHT + 24, paddingBottom: insets.bottom + 90 },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Decorative header */}
+          <View style={styles.firstTimeHeader}>
+            <Text style={styles.bismillah}>بِسْمِ اللَّهِ</Text>
+            <Text style={styles.greeting}>Assalamu Alaykum</Text>
+            <Text style={styles.greetingSub}>Which surah would you like to revise today?</Text>
+          </View>
+
+          {/* Search */}
+          <View style={styles.searchBarLarge}>
+            <MaterialIcons name="search" size={22} color={Colors.outline} />
+            <TextInput
+              style={styles.searchInputLarge}
+              placeholder="Search by name or number…"
+              placeholderTextColor={Colors.outline}
+              value={query}
+              onChangeText={setQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              clearButtonMode="while-editing"
+            />
+          </View>
+
+          {/* Search results */}
+          {filtered.length > 0 && (
+            <View style={styles.resultsList}>
+              {filtered.map((s: SurahMeta) => (
+                <TouchableOpacity
+                  key={s.id}
+                  style={styles.resultItem}
+                  onPress={() => router.push(`/surah/${s.id}`)}
+                  activeOpacity={0.75}
+                >
+                  <View style={styles.resultNum}>
+                    <Text style={styles.resultNumText}>{String(s.id).padStart(3, '0')}</Text>
+                  </View>
+                  <View style={styles.resultBody}>
+                    <Text style={styles.resultName}>{s.name}</Text>
+                    <View style={styles.resultMetaRow}>
+                      <Text style={styles.resultArabic}>{s.arabicName}</Text>
+                      <Text style={styles.resultDot}>·</Text>
+                      <Text style={styles.resultMeta}>{s.ayahCount} Ayahs</Text>
+                      <Text style={styles.resultDot}>·</Text>
+                      <Text style={styles.resultMeta}>{s.revelation}</Text>
+                    </View>
+                  </View>
+                  <MaterialIcons name="arrow-forward" size={18} color={Colors.primary} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Quick-start chips (shown when search is empty) */}
+          {!query.trim() && (
+            <View style={styles.quickStartSection}>
+              <Text style={styles.quickStartLabel}>Popular surahs to begin</Text>
+              <View style={styles.chipRow}>
+                {QUICK_START.map((s) => (
+                  <TouchableOpacity
+                    key={s.id}
+                    style={styles.chip}
+                    onPress={() => router.push(`/surah/${s.id}`)}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={styles.chipNum}>{s.id}</Text>
+                    <Text style={styles.chipText}>{s.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Browse all link */}
+          <TouchableOpacity
+            style={styles.browseLink}
+            onPress={() => router.push('/(tabs)/library')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.browseLinkText}>Browse all 114 surahs</Text>
+            <MaterialIcons name="arrow-forward" size={14} color={Colors.primary} />
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.root}>
@@ -150,7 +266,135 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.surface },
   scroll: { paddingHorizontal: 20, gap: 24 },
 
-  // Focus
+  // ── First-time state ──────────────────────────────────────────────────────
+  firstTimeScroll: { paddingHorizontal: 24, gap: 28 },
+
+  firstTimeHeader: { alignItems: 'center', gap: 10, paddingTop: 8 },
+  bismillah: {
+    fontSize: 40,
+    color: Colors.primary,
+    opacity: 0.18,
+    marginBottom: 4,
+    letterSpacing: 2,
+  },
+  greeting: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: Colors.onSurface,
+    letterSpacing: -0.8,
+    textAlign: 'center',
+  },
+  greetingSub: {
+    fontSize: 15,
+    color: Colors.onSurfaceVariant,
+    textAlign: 'center',
+    lineHeight: 22,
+    fontWeight: '500',
+  },
+
+  searchBarLarge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.primaryFixed,
+  },
+  searchInputLarge: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.onSurface,
+    padding: 0,
+    fontWeight: '500',
+  },
+
+  resultsList: {
+    backgroundColor: Colors.surfaceContainerLow,
+    borderRadius: 14,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(192,201,187,0.2)',
+    marginTop: -8,
+  },
+  resultItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    gap: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(192,201,187,0.15)',
+  },
+  resultNum: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    backgroundColor: Colors.primaryFixed,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resultNumText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.primary,
+    letterSpacing: 0.5,
+  },
+  resultBody: { flex: 1, gap: 3 },
+  resultName: { fontSize: 16, fontWeight: '700', color: Colors.onSurface, letterSpacing: -0.2 },
+  resultMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  resultArabic: { fontSize: 13, color: Colors.primary, opacity: 0.8 },
+  resultDot: { fontSize: 12, color: Colors.outline },
+  resultMeta: { fontSize: 12, color: Colors.onSurfaceVariant },
+
+  quickStartSection: { gap: 14 },
+  quickStartLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    color: Colors.onSurfaceVariant,
+    textTransform: 'uppercase',
+  },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.surfaceContainer,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(192,201,187,0.25)',
+  },
+  chipNum: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.primary,
+    opacity: 0.7,
+  },
+  chipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.onSurface,
+  },
+
+  browseLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 4,
+  },
+  browseLinkText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
+
+  // ── Returning user state (unchanged) ─────────────────────────────────────
   focusRow: { flexDirection: 'row', gap: 14, alignItems: 'flex-end' },
   focusLeft: { flex: 1 },
   focusEyebrow: { fontSize: 10, fontWeight: '800', letterSpacing: 2, color: Colors.secondary, textTransform: 'uppercase', marginBottom: 6 },
@@ -162,7 +406,6 @@ const styles = StyleSheet.create({
   streakCount: { fontSize: 44, fontWeight: '900', color: Colors.primary, letterSpacing: -2, lineHeight: 48 },
   streakUnit: { fontSize: 14, color: Colors.onSurfaceVariant, marginBottom: 6 },
 
-  // Bento
   bentoRow: { flexDirection: 'row', gap: 12, height: 200 },
   masteryCard: { flex: 2, backgroundColor: Colors.primary, borderRadius: 14, padding: 20, justifyContent: 'space-between' },
   masteryTitle: { fontSize: 17, fontWeight: '700', color: Colors.onPrimary },
@@ -179,7 +422,6 @@ const styles = StyleSheet.create({
   insightsBtn: { backgroundColor: Colors.surfaceContainerLowest, borderRadius: 8, paddingVertical: 8, alignItems: 'center' },
   insightsBtnText: { fontSize: 12, fontWeight: '700', color: Colors.primary },
 
-  // Due Today
   section: { gap: 10 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   sectionTitle: { fontSize: 22, fontWeight: '900', color: Colors.onSurface, letterSpacing: -0.5 },
@@ -195,7 +437,6 @@ const styles = StyleSheet.create({
   startBtn: { backgroundColor: Colors.primary, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20 },
   startBtnText: { color: Colors.onPrimary, fontWeight: '700', fontSize: 11, letterSpacing: 0.5 },
 
-  // Critical Review
   criticalCard: { backgroundColor: Colors.tertiaryContainer, borderRadius: 14, padding: 22, gap: 16 },
   criticalHeader: { gap: 8 },
   criticalTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
