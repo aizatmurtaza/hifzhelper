@@ -21,11 +21,58 @@ export default function ActiveSessionScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const AT_TAWBAH_ID = 9;
-  const BISMILLAH_FALLBACK = 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ';
-
   const surahIdNum = Number(surahId);
   const surah = getSurah(surahIdNum);
+
+  const AT_TAWBAH = 9;
+  const AL_FATIHA = 1;
+
+  // Normalize Arabic text: strip diacritics and normalize alef variants so
+  // we can reliably detect the Bismillah prefix regardless of edition.
+  function normArabic(s: string): string {
+    return s
+      .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u0640]/g, '')
+      .replace(/[\u0622\u0623\u0625\u0671]/g, '\u0627');
+  }
+
+  const BISMILLAH_NORM = 'بسم الله الرحمن الرحيم';
+  const DIACRITIC_RE = /[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u0640]/;
+
+  // If arabic starts with the Bismillah, returns the split; otherwise null.
+  function extractBismillah(arabic: string): { bismillah: string; rest: string } | null {
+    if (!normArabic(arabic).startsWith(BISMILLAH_NORM)) return null;
+    let origIdx = 0;
+    let normCount = 0;
+    while (normCount < BISMILLAH_NORM.length && origIdx < arabic.length) {
+      if (!DIACRITIC_RE.test(arabic[origIdx])) normCount++;
+      origIdx++;
+    }
+    while (origIdx < arabic.length && arabic[origIdx] === ' ') origIdx++;
+    return { bismillah: arabic.slice(0, origIdx).trim(), rest: arabic.slice(origIdx) };
+  }
+
+  // Apply Bismillah separation to a list of ayahs and return { bismillah, ayahs }.
+  function separateBismillah(list: Ayah[], isFatiha: boolean): { bismillah: string | null; ayahs: Ayah[] } {
+    if (list.length === 0) return { bismillah: null, ayahs: list };
+    if (isFatiha) {
+      // Verse 1 of Al-Fatiha IS the Bismillah — exclude it from the verse flow.
+      const first = list[0];
+      if (normArabic(first.arabic) === BISMILLAH_NORM) {
+        return { bismillah: first.arabic, ayahs: list.slice(1) };
+      }
+      return { bismillah: null, ayahs: list };
+    }
+    // For all other surahs: strip the Bismillah prefix from verse 1's text.
+    const first = list[0];
+    const extracted = extractBismillah(first.arabic);
+    if (extracted) {
+      return {
+        bismillah: extracted.bismillah,
+        ayahs: [{ ...first, arabic: extracted.rest }, ...list.slice(1)],
+      };
+    }
+    return { bismillah: null, ayahs: list };
+  }
 
   useEffect(() => {
     async function load() {
@@ -37,8 +84,15 @@ export default function ActiveSessionScreen() {
           const last = getLastSession();
           if (last && last.surahId === surahIdNum) {
             const weak = getWeakAyahs(last);
-            setAyahs(weak.map((w) => w.ayah));
-            setBismillah(surahIdNum !== AT_TAWBAH_ID ? BISMILLAH_FALLBACK : null);
+            const weakAyahs = weak.map((w) => w.ayah);
+            if (surahIdNum !== AT_TAWBAH) {
+              const { bismillah: bism, ayahs: cleaned } = separateBismillah(weakAyahs, surahIdNum === AL_FATIHA);
+              setBismillah(bism);
+              setAyahs(cleaned);
+            } else {
+              setBismillah(null);
+              setAyahs(weakAyahs);
+            }
             setRatings([]);
             setIndex(0);
             setLoading(false);
@@ -48,18 +102,10 @@ export default function ActiveSessionScreen() {
 
         const fetched = await fetchSurahAyahs(surahIdNum);
 
-        // Separate Bismillah if it appears as verse 1 (e.g. Al-Fatiha)
-        const isBismillahVerse = (a: Ayah) =>
-          a.num === 1 && a.translation.toLowerCase().startsWith('in the name of');
-
-        if (surahIdNum !== AT_TAWBAH_ID) {
-          if (fetched.length > 0 && isBismillahVerse(fetched[0])) {
-            setBismillah(fetched[0].arabic);
-            setAyahs(fetched.slice(1));
-          } else {
-            setBismillah(BISMILLAH_FALLBACK);
-            setAyahs(fetched);
-          }
+        if (surahIdNum !== AT_TAWBAH) {
+          const { bismillah: bism, ayahs: cleaned } = separateBismillah(fetched, surahIdNum === AL_FATIHA);
+          setBismillah(bism);
+          setAyahs(cleaned);
         } else {
           setBismillah(null);
           setAyahs(fetched);
