@@ -15,10 +15,14 @@ export default function ActiveSessionScreen() {
   const { surahId, retryWeak } = useLocalSearchParams<{ surahId: string; retryWeak?: string }>();
 
   const [ayahs, setAyahs] = useState<Ayah[]>([]);
+  const [bismillah, setBismillah] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const AT_TAWBAH_ID = 9;
+  const BISMILLAH_FALLBACK = 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ';
 
   const surahIdNum = Number(surahId);
   const surah = getSurah(surahIdNum);
@@ -34,6 +38,7 @@ export default function ActiveSessionScreen() {
           if (last && last.surahId === surahIdNum) {
             const weak = getWeakAyahs(last);
             setAyahs(weak.map((w) => w.ayah));
+            setBismillah(surahIdNum !== AT_TAWBAH_ID ? BISMILLAH_FALLBACK : null);
             setRatings([]);
             setIndex(0);
             setLoading(false);
@@ -42,7 +47,24 @@ export default function ActiveSessionScreen() {
         }
 
         const fetched = await fetchSurahAyahs(surahIdNum);
-        setAyahs(fetched);
+
+        // Separate Bismillah if it appears as verse 1 (e.g. Al-Fatiha)
+        const isBismillahVerse = (a: Ayah) =>
+          a.num === 1 && a.translation.toLowerCase().startsWith('in the name of');
+
+        if (surahIdNum !== AT_TAWBAH_ID) {
+          if (fetched.length > 0 && isBismillahVerse(fetched[0])) {
+            setBismillah(fetched[0].arabic);
+            setAyahs(fetched.slice(1));
+          } else {
+            setBismillah(BISMILLAH_FALLBACK);
+            setAyahs(fetched);
+          }
+        } else {
+          setBismillah(null);
+          setAyahs(fetched);
+        }
+
         setRatings([]);
         setIndex(0);
       } catch (e: any) {
@@ -138,6 +160,13 @@ export default function ActiveSessionScreen() {
         <Text style={styles.flowLabel}>REVISION FLOW</Text>
       </View>
 
+      {/* Bismillah header */}
+      {bismillah && (
+        <View style={styles.bismillahHeader}>
+          <Text style={styles.bismillahHeaderText}>{bismillah}</Text>
+        </View>
+      )}
+
       {/* Main content */}
       <View style={styles.canvas}>
         <View style={styles.ayahNumRow}>
@@ -194,6 +223,21 @@ const styles = StyleSheet.create({
   progressTotal: { fontSize: 10, fontWeight: '700', color: Colors.outline, letterSpacing: 0.8 },
 
   surahMeta: { paddingHorizontal: 24, paddingBottom: 4 },
+  bismillahHeader: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(192,201,187,0.2)',
+  },
+  bismillahHeaderText: {
+    fontSize: 22,
+    color: Colors.primary,
+    textAlign: 'center',
+    writingDirection: 'rtl',
+    letterSpacing: 1,
+    opacity: 0.75,
+  },
   surahLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 2, color: Colors.onSurfaceVariant },
   flowLabel: { fontSize: 10, fontWeight: '600', letterSpacing: 1.5, color: Colors.outline, textTransform: 'uppercase' },
 
