@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   rowBody: { flex: 1, gap: 3 },
   nameEn: { fontSize: 16, fontWeight: '700', color: Colors.onSurface, letterSpacing: -0.2 },
   rowMeta: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  nameAr: { fontSize: 13, color: Colors.primary, opacity: 0.8 },
+  nameAr: { fontFamily: 'AmiriQuran_400Regular', fontSize: 14, color: Colors.primary, opacity: 0.8 },
   dot: { fontSize: 12, color: Colors.outline },
   metaText: { fontSize: 12, color: Colors.onSurfaceVariant },
 });

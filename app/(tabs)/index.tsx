@@ -271,11 +271,11 @@ const styles = StyleSheet.create({
 
   firstTimeHeader: { alignItems: 'center', gap: 10, paddingTop: 8 },
   bismillah: {
+    fontFamily: 'AmiriQuran_400Regular',
     fontSize: 40,
     color: Colors.primary,
     opacity: 0.18,
     marginBottom: 4,
-    letterSpacing: 2,
   },
   greeting: {
     fontSize: 30,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   resultBody: { flex: 1, gap: 3 },
   resultName: { fontSize: 16, fontWeight: '700', color: Colors.onSurface, letterSpacing: -0.2 },
   resultMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  resultArabic: { fontSize: 13, color: Colors.primary, opacity: 0.8 },
+  resultArabic: { fontFamily: 'AmiriQuran_400Regular', fontSize: 14, color: Colors.primary, opacity: 0.8 },
   resultDot: { fontSize: 12, color: Colors.outline },
   resultMeta: { fontSize: 12, color: Colors.onSurfaceVariant },
 

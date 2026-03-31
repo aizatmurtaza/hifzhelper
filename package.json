@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/amiri-quran": "^0.4.1",
     "@expo-google-fonts/manrope": "^0.4.2",
     "@expo/metro-runtime": "^55.0.8-canary-20260327-0789fbc",
     "@expo/vector-icons": "^15.1.1",
