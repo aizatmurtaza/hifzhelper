@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 16, fontWeight: '700', color: Colors.primary },
 
   arabicNameCard: { backgroundColor: Colors.surfaceContainerLow, borderRadius: 14, padding: 14, alignItems: 'flex-end' },
-  arabicName: { fontSize: 28, color: Colors.primary, fontWeight: '600' },
+  arabicName: { fontFamily: 'AmiriQuran_400Regular', fontSize: 28, color: Colors.primary },
   surahNumLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 2, color: Colors.outline, marginTop: 4 },
 
   infoRow: { flexDirection: 'row', gap: 10 },

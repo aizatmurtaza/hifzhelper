@@ -208,12 +208,12 @@ const styles = StyleSheet.create({
   ayahNumBig: { fontSize: 64, fontWeight: '300', color: Colors.onSurface, letterSpacing: -2, lineHeight: 68 },
   ayahWord: { fontSize: 18, fontWeight: '600', color: Colors.onSurface, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 10 },
   arabicText: {
+    fontFamily: 'AmiriQuran_400Regular',
     fontSize: 36,
     color: Colors.primary,
     textAlign: 'center',
     writingDirection: 'rtl',
-    lineHeight: 58,
-    letterSpacing: 1,
+    lineHeight: 64,
   },
   divider: { width: 40, height: 1, backgroundColor: 'rgba(192,201,187,0.35)' },
   translation: {
